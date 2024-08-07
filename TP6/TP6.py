@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-ix, iy = -1, -1 
+ix, iy = -1, -1
 fx, fy = -1, -1
 
 recorte = False
@@ -9,7 +9,7 @@ recorte = False
 def recortar(event, x, y, flags, param):
     global ix, iy, fx, fy, img, recorte
     if event == cv2.EVENT_LBUTTONDOWN:
-        ix , iy = x, y
+        ix, iy = x, y
         img = cv2.imread('original.jpg')
     elif event == cv2.EVENT_LBUTTONUP:
         cv2.rectangle(img, (ix, iy), (x, y), (255, 0, 0), 0)
@@ -18,49 +18,53 @@ def recortar(event, x, y, flags, param):
         fy = y
 
 
-def trEucl(img, center, angle, x, y, scale):
-    (h, w) = img.shape[:2]
+def trSim(img, center, angle, x, y, scale):
+    rows, cols = img.shape[:2]
 
-    if center is None:
-        center = (w/2, h/2)
-    
     R = cv2.getRotationMatrix2D(center, angle, scale)
 
-    rotated = cv2.warpAffine(img, R, (w, h))
+    img = cv2.warpAffine(img, R, (cols, rows))
 
     T = np.float32([[1, 0, x], [0, 1, y]])
 
-    transformed = cv2.warpAffine(rotated, T, (w, h))
-    
+    transformed = cv2.warpAffine(img, T, (cols, rows))
+
     return transformed
+
 
 img = cv2.imread('original.jpg')
 cv2.namedWindow('Imagen')
 cv2.setMouseCallback('Imagen', recortar)
+blackNp = np.zeros(img.shape)
 
 while True:
     cv2.imshow('Imagen', img)
     k = cv2.waitKey(1) & 0xFF
-    if k == ord('e'):
+    if k == ord('s'):
         if recorte:
+
+            img = cv2.imread('original.jpg')
+            
             x0 = min(ix, fx)
             x1 = max(ix, fx)
             y0 = min(iy, fy)
             y1 = max(iy, fy)
-            imgRecortada = img[y0:y1, x0:x1]
+
+            blackNp[y0:y1, x0:x1] = img[y0:y1, x0:x1]
+            img[y0:y1, x0:x1] = 0
+
             tx = int(input('Introduzca la translación en x: '))
             ty = int(input('Introduzca la translación en y: '))
             angle = float(input('Introduzca el ángulo de rotación: '))
             scale = float(input('Introduzca la escala deseada: '))
-            transformed = trEucl(imgRecortada, None, angle, tx, ty, scale)
 
-            cv2.imshow('Imagen', transformed)
-            cv2.waitKey(0)
-            cv2.imwrite('transformada.jpg',transformed)
+            transformed = trSim(blackNp, (x0 + (x1 - x0)/2, y0 + (y1 - y0)/2), angle, tx, ty, scale)
+
+            cv2.imwrite('transformada.jpg', transformed)
             break
         else:
             print('Seleccione una parte de la imagen primero')
-    
+
     elif k == 27:
         break
 
