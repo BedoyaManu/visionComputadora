@@ -12,7 +12,7 @@ image = original_image.copy()
 warped_image = None
 warped_copy = None
 selecting_points = True     # Flag para la medición de distancias
-oneTimeFlag = True          # Flag para elegir el tamaño de la estantería solo una vez
+oneTimeFlag = True          # Flag para elegir las esquinas solo una vez
 
 # Función para elegir las esquinas de la estantería
 def click_event(event, x, y, flags, params):

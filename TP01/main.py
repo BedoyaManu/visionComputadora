@@ -2,7 +2,6 @@ import random
 
 def adivina(intentos_max):
 
-
     numero_aleatorio = random.randint(0, 100)
     intentos_usados = 0
     while intentos_usados < intentos_max:
